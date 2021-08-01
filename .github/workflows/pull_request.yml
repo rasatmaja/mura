@@ -1,0 +1,100 @@
+name: Mura - Pull Request
+
+on: 
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - "**/*.go"
+
+jobs:
+  linting-unit-test:
+    outputs:
+      gitdiffs: ${{ steps.gitdiff.outputs.istest }}
+    name: Go Lint and Unit Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup timezone to Asia/Jakarta
+      run: |
+        sudo timedatectl set-timezone Asia/Jakarta
+    - name: Set up Go 1.16.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.16
+      id: go
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: Lint code base
+      run: |
+        go get golang.org/x/lint/golint
+        golint -set_exit_status ./...
+    - name: Running Unit Test
+      run: |
+        go test ./... -cover -vet -all -short -covermode=count -coverprofile=cover.out
+    - name: Check Git Diff test file 
+      uses: technote-space/get-diff-action@v4
+      with:
+        PATTERNS: |
+          +(internal|pkg)/**/*_test.go
+    - name: Set gitdiff outputs
+      id: gitdiff
+      run: echo "::set-output name=istest::${{ env.GIT_DIFF }}"    
+    - name: Generate code coverage 
+      if: env.GIT_DIFF   
+      run: |
+        go tool cover -func cover.out -o coverage.out
+    - name: 'Upload Go code coverage artifact'
+      if: env.GIT_DIFF
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: coverage.out
+        retention-days: 5    
+  
+  publish-code-coverage:
+    name: Publish Code Coverage
+    needs: linting-unit-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download coverage artifact
+        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage
+      - name: Display code coverage
+        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
+        shell: bash
+        run: |
+          ls
+          cat coverage.out
+      - name: Publish code coverage into PR
+        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const fs = require('fs')
+            fs.readFile('coverage.out', 'utf-8', (err, data) => {
+                if (err) throw err;
+
+                let splitArray = data.split('\n');
+                let total = splitArray[splitArray.length - 2].replace(/[^\d.-]/g, '');
+                let min = 50;
+
+                let body_msg = total > min ? '## 🎉 Yay, Code Coverage: ' + total + '% \n' + 'Congrats your code coverage is above the minimum value of **' + min + '%**, which is its great' : '## 🤬 Oh no.. , Code Coverage: ' + total + '% \n';
+
+                github.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: '## **Code Coverage Report** : \n' + '``` \n' + data + ' \n ```'
+                }); 
+
+                github.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: body_msg
+                });
+            })
+              
