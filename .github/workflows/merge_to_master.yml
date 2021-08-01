@@ -1,12 +1,10 @@
 name: Mura - Merge to Master
 
-on: [pull_request]
-  # push:
-  #   paths:
-  #     - "**/*.go"
-  #   branches:
-  #     - master
-  #     - main
+on: 
+  push:
+    branches:
+      - master
+      - main
 jobs:
   lint:
     name: Check Go module availability
