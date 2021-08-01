@@ -7,6 +7,7 @@ import (
 
 func TestMura(t *testing.T) {
 	os.Setenv("SERVER_HOST", "127.0.0.1")
+	os.Setenv("SERVER_PORT", "8989")
 
 	type test struct {
 		Host string `mapstructure:"SERVER_HOST"`

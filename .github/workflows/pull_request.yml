@@ -10,8 +10,6 @@ on:
 
 jobs:
   linting-unit-test:
-    outputs:
-      gitdiffs: ${{ steps.gitdiff.outputs.istest }}
     name: Go Lint and Unit Test
     runs-on: ubuntu-latest
     steps:
@@ -31,26 +29,16 @@ jobs:
         golint -set_exit_status ./...
     - name: Running Unit Test
       run: |
-        go test ./... -cover -vet -all -short -covermode=count -coverprofile=cover.out
-    - name: Check Git Diff test file 
-      uses: technote-space/get-diff-action@v4
-      with:
-        PATTERNS: |
-          +(internal|pkg)/**/*_test.go
-    - name: Set gitdiff outputs
-      id: gitdiff
-      run: echo "::set-output name=istest::${{ env.GIT_DIFF }}"    
-    - name: Generate code coverage 
-      if: env.GIT_DIFF   
+        go test ./... -cover -vet -all -short -covermode=count -coverprofile=cover.out 
+    - name: Generate code coverage    
       run: |
         go tool cover -func cover.out -o coverage.out
     - name: 'Upload Go code coverage artifact'
-      if: env.GIT_DIFF
       uses: actions/upload-artifact@v2
       with:
         name: coverage
         path: coverage.out
-        retention-days: 5    
+        retention-days: 1    
   
   publish-code-coverage:
     name: Publish Code Coverage
@@ -58,18 +46,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download coverage artifact
-        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
         uses: actions/download-artifact@v2
         with:
           name: coverage
       - name: Display code coverage
-        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
         shell: bash
         run: |
           ls
           cat coverage.out
       - name: Publish code coverage into PR
-        if: ${{ needs.linting-unit-test.outputs.gitdiffs }}
         uses: actions/github-script@v4
         with:
           script: |
@@ -87,14 +72,7 @@ jobs:
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: '## **Code Coverage Report** : \n' + '``` \n' + data + ' \n ```'
+                  body: body_msg + '\n' + '<details><summary><b>Code Coverage Report</b></summary><p>' + '\n\n' + '``` \n' + data + ' \n ``` \n' + '</p></details>'
                 }); 
-
-                github.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: body_msg
-                });
             })
               
