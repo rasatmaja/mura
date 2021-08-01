@@ -29,5 +29,5 @@ jobs:
 
     - name: Check mura availability
       run: |
-        go list -m ${{ env.MODULE_NAME }}@${{ env.LATEST_TAG }
+        go list -m ${{ env.MODULE_NAME }}@${{ env.LATEST_TAG }}
         
