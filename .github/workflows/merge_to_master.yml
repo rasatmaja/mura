@@ -15,9 +15,6 @@ jobs:
       MODULE_NAME: github.com/rasatmaja/mura
     steps:
 
-    - name: Check latest tag
-      run: echo "LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
-
     - name: Set up Go 1.16.x
       uses: actions/setup-go@v2
       with:
@@ -26,6 +23,11 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+
+    - name: Check latest tag
+      run: |
+        git fetch origin --tags
+        echo "LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
 
     - name: Check mura availability
       run: |
