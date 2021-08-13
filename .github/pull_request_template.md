@@ -1,6 +1,6 @@
 **Issues Number** : 
-- [] #101
-- [] #102   
+- #101
+- #102   
 
 **Pull request type** :  
 
