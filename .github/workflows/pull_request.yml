@@ -74,5 +74,9 @@ jobs:
                   repo: context.repo.repo,
                   body: body_msg + '\n' + '<details><summary><b>Code Coverage Report</b></summary><p>' + '\n\n' + '``` \n' + data + ' \n ``` \n' + '</p></details>'
                 }); 
+
+                if (total < min) {
+                  core.setFailed('Code coverage doesnt meet minimum target');
+                }
             })
               
