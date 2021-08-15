@@ -1,5 +1,3 @@
-module github.com/rasatmaja/mura
+module github.com/rasatmaja/mura/v2
 
 go 1.16
-
-require github.com/spf13/viper v1.8.1
