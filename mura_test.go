@@ -55,4 +55,43 @@ func TestMura(t *testing.T) {
 		}
 
 	})
+
+	t.Run("no-env-no-default", func(t *testing.T) {
+
+		type TestENV struct {
+			ServerHost string `env:"SERVER_HOST"`
+			DBHost     string `env:"DB_HOST" default:"localhost"`
+			DBPort     int
+		}
+
+		env := new(TestENV)
+		err := Unmarshal(env)
+		print(env)
+
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+
+	})
+
+	t.Run("error-conversion-type", func(t *testing.T) {
+
+		type TestENV struct {
+			ServerHost string `env:"SERVER_HOST"`
+			DBHost     string `env:"DB_HOST" default:"localhost"`
+			DBPort     int    `default:"it should be integer"`
+			DBSSL      bool   `default:"it should be boolean"`
+		}
+
+		env := new(TestENV)
+		err := Unmarshal(env)
+		print(env)
+
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+
+	})
 }
