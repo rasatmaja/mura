@@ -12,12 +12,13 @@ import (
 func Unmarshal(strct interface{}) error {
 	iface := reflect.ValueOf(strct)
 
-	// Checking interface kind,
-	// if iterface is pointer
-	// then get interface element
-	if iface.Kind() == reflect.Ptr {
-		iface = iface.Elem()
+	// if interface not pointer
+	if iface.Kind() != reflect.Ptr {
+		// return error
+		return fmt.Errorf("interface:%v, not pointer", iface.Type().Name())
 	}
+
+	iface = iface.Elem()
 
 	for i := 0; i < iface.NumField(); i++ {
 		ivalue := iface.Field(i)
