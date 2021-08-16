@@ -30,28 +30,25 @@ func Unmarshal(strct interface{}) error {
 		// then bind those env with field struct
 		if ok {
 			err := bind(ivalue, env)
+			// if error is nil then continue into next iteration
 			if err == nil {
 				continue
 			}
-			log.Printf("Cannot bind field %s with %s, got error: %v", field.Name, env, err)
+			log.Printf("Cannot bind field %s with env:%s, got error: %v", field.Name, env, err)
 		}
 
 		// if binding process error then
 		// fill struct field with default value
-		val, ok := iface.Type().Field(i).Tag.Lookup("default")
+		val, ok := field.Tag.Lookup("default")
 
-		// if default tag not found
-		// continue next field iteration
-		if !ok {
-			continue
+		// if default tag found
+		if ok {
+			// fill struct value with default value
+			err := fill(ivalue, val)
+			if err != nil {
+				log.Printf("Cannot bind field %s with default value (%s), got error: %v", field.Name, val, err)
+			}
 		}
-
-		// fill struct value with default value
-		err := fillField(ivalue, val)
-		if err != nil {
-			log.Printf("Cannot bind field %s with default value (%s), got error: %v", field.Name, val, err)
-		}
-
 	}
 	return nil
 }
@@ -63,10 +60,10 @@ func bind(field reflect.Value, key string) error {
 	if !ok {
 		return errBindENVNotFound
 	}
-	return fillField(field, env)
+	return fill(field, env)
 }
 
-func fillField(field reflect.Value, value string) error {
+func fill(field reflect.Value, value string) error {
 	switch field.Kind() {
 	case reflect.String:
 		field.SetString(value)
