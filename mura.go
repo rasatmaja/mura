@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+func init() {
+	log.SetPrefix("[ MURA ] ")
+}
+
 // Unmarshal is a function to unmarshall value from env to struct value
 func Unmarshal(strct interface{}) error {
 	iface := reflect.ValueOf(strct)
