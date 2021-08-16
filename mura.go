@@ -15,7 +15,7 @@ func Unmarshal(strct interface{}) error {
 	// if interface not pointer
 	if iface.Kind() != reflect.Ptr {
 		// return error
-		return fmt.Errorf("interface:%v, not pointer", iface.Type().Name())
+		return fmt.Errorf("interface:%v, isn't pointer", iface.Type().Name())
 	}
 
 	iface = iface.Elem()
@@ -57,11 +57,14 @@ func Unmarshal(strct interface{}) error {
 var errBindENVNotFound = fmt.Errorf("env not found")
 
 func bind(field reflect.Value, key string) error {
-	env, ok := os.LookupEnv(key)
-	if !ok {
-		return errBindENVNotFound
+	// lookup env based on param key
+	// if env found
+	if env, ok := os.LookupEnv(key); ok {
+		// then fill field struct with env value
+		return fill(field, env)
 	}
-	return fill(field, env)
+	// return error not found
+	return errBindENVNotFound
 }
 
 func fill(field reflect.Value, value string) error {
@@ -80,7 +83,8 @@ func fill(field reflect.Value, value string) error {
 			return err
 		}
 		field.SetInt(v)
+	default:
+		return fmt.Errorf("type:%v, not supported", field.Kind())
 	}
-
 	return nil
 }

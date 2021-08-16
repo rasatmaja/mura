@@ -94,4 +94,35 @@ func TestMura(t *testing.T) {
 		}
 
 	})
+
+	t.Run("error-interface-non-pointer", func(t *testing.T) {
+
+		type TestENV struct{}
+
+		env := TestENV{}
+		err := Unmarshal(env)
+
+		if err == nil {
+			t.Error("Expectec error")
+			t.Fail()
+		}
+
+	})
+
+	t.Run("error-unsuported-type", func(t *testing.T) {
+
+		type CustomType struct{}
+		type TestENV struct {
+			Test CustomType `default:"custom type"`
+		}
+
+		env := new(TestENV)
+		err := Unmarshal(env)
+
+		if err != nil {
+			t.Error("Expectec error")
+			t.Fail()
+		}
+
+	})
 }
