@@ -2,6 +2,7 @@ package mura
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -19,18 +20,38 @@ func Unmarshal(strct interface{}) error {
 	}
 
 	for i := 0; i < iface.NumField(); i++ {
-		field := iface.Field(i)
+		ivalue := iface.Field(i)
+		field := iface.Type().Field(i)
 
 		// lookup and get value from env tag in struct field
-		tag, ok := iface.Type().Field(i).Tag.Lookup("env")
+		env, ok := field.Tag.Lookup("env")
 
-		// if tag env not found continiue iteration
-		// into next field
+		// if tag env found
+		// then bind those env with field struct
+		if ok {
+			err := bind(ivalue, env)
+			if err == nil {
+				continue
+			}
+			log.Printf("Cannot bind field %s with %s, got error: %v", field.Name, env, err)
+		}
+
+		// if binding process error then
+		// fill struct field with default value
+		val, ok := iface.Type().Field(i).Tag.Lookup("default")
+
+		// if default tag not found
+		// continue next field iteration
 		if !ok {
 			continue
 		}
 
-		bind(field, tag)
+		// fill struct value with default value
+		err := fillField(ivalue, val)
+		if err != nil {
+			log.Printf("Cannot bind field %s with default value (%s), got error: %v", field.Name, val, err)
+		}
+
 	}
 	return nil
 }

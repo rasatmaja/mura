@@ -17,12 +17,32 @@ func print(i interface{}) {
 func TestMura(t *testing.T) {
 	os.Setenv("SERVER_HOST", "localhost")
 	os.Setenv("SERVER_PORT", "8080")
+	os.Setenv("SERVER_PRODUCTION", "true")
 
 	t.Run("success", func(t *testing.T) {
 
 		type TestENV struct {
+			ServerHost       string `env:"SERVER_HOST"`
+			ServerPort       int    `env:"SERVER_PORT"`
+			ServerProduction bool   `env:"SERVER_PRODUCTION"`
+		}
+
+		env := new(TestENV)
+		err := Unmarshal(env)
+		print(env)
+
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+
+	})
+
+	t.Run("success-default", func(t *testing.T) {
+
+		type TestENV struct {
 			ServerHost string `env:"SERVER_HOST"`
-			ServerPort int    `env:"SERVER_PORT"`
+			DBHost     string `env:"DB_HOST" default:"localhost"`
 		}
 
 		env := new(TestENV)
