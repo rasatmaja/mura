@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://assets.rasatmaja.com/mura/hero.webp" width=300> 
+    <img src="https://assets.rasatmaja.com/mura/gopher.webp" width=200> 
 </p>
 
 <p align="center">
@@ -10,4 +10,10 @@
 </p>
 
 # 🐍 Mura 
-A simple environtment variable reader for Go.
+An environment variable reader for Go that bind env value into struct variable, with zero external dependency. The main idea of ​​making this project is the use of `os` and `reflect` packages from Go.
+
+## Overview
+This package will provide following features:
+- Read system environtment variable bassed on `env` struct tag
+- Bind env value into struct 
+- Fill struct with default value if env not present
