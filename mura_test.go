@@ -18,6 +18,7 @@ func TestMura(t *testing.T) {
 	os.Setenv("SERVER_HOST", "localhost")
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_PRODUCTION", "true")
+	os.Setenv("PI_CONST", "3.14")
 
 	t.Run("success", func(t *testing.T) {
 
@@ -25,6 +26,8 @@ func TestMura(t *testing.T) {
 			ServerHost       string `env:"SERVER_HOST"`
 			ServerPort       int    `env:"SERVER_PORT"`
 			ServerProduction bool   `env:"SERVER_PRODUCTION"`
+
+			PiConts float64 `env:"PI_CONST"`
 		}
 
 		env := new(TestENV)
@@ -78,10 +81,11 @@ func TestMura(t *testing.T) {
 	t.Run("error-conversion-type", func(t *testing.T) {
 
 		type TestENV struct {
-			ServerHost string `env:"SERVER_HOST"`
-			DBHost     string `env:"DB_HOST" default:"localhost"`
-			DBPort     int    `default:"it should be integer"`
-			DBSSL      bool   `default:"it should be boolean"`
+			ServerHost string  `env:"SERVER_HOST"`
+			DBHost     string  `env:"DB_HOST" default:"localhost"`
+			DBPort     int     `default:"it should be integer"`
+			DBSSL      bool    `default:"it should be boolean"`
+			PiConts    float64 `default:"it should be float"`
 		}
 
 		env := new(TestENV)

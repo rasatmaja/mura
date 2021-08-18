@@ -87,6 +87,12 @@ func fill(field reflect.Value, value string) error {
 			return err
 		}
 		field.SetInt(v)
+	case reflect.Float32, reflect.Float64:
+		v, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return err
+		}
+		field.SetFloat(v)
 	default:
 		return fmt.Errorf("type:%v, not supported", field.Kind())
 	}
