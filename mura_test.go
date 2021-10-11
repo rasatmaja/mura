@@ -70,7 +70,6 @@ func TestMura(t *testing.T) {
 		type TestENV struct {
 			ServerHost string `env:"SERVER_HOST"`
 			DBHost     string `env:"DB_HOST" default:"localhost"`
-			DBPort     int
 		}
 
 		env := new(TestENV)
@@ -86,12 +85,13 @@ func TestMura(t *testing.T) {
 
 	t.Run("error-conversion-type", func(t *testing.T) {
 
+		os.Setenv("DB_PORT", "3.14")
 		type TestENV struct {
 			ServerHost string  `env:"SERVER_HOST"`
 			DBHost     string  `env:"DB_HOST" default:"localhost"`
-			DBPort     int     `default:"it should be integer"`
 			DBSSL      bool    `default:"it should be boolean"`
 			PiConts    float64 `default:"it should be float"`
+			DBPort     int     `env:"DB_PORT"`
 		}
 
 		env := new(TestENV)
@@ -142,7 +142,7 @@ func TestMuraWithEnvFile(t *testing.T) {
 		defer func() {
 			os.Remove(".env")
 		}()
-		os.WriteFile(".env", []byte("SERVER_PORT=6969"), 0600)
+		os.WriteFile(".env", []byte("SERVER_PORT=123\nSERVER_PRODUCTION=123"), 0600)
 		SetENVPath(".env")
 
 		type TestENV struct {
