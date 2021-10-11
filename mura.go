@@ -46,7 +46,7 @@ func Unmarshal(strct interface{}) error {
 			var err error
 			// bind struct field with system variables
 			err = bind(ivalue, env)
-			if err != nil {
+			if err != nil && err != errBindENVNotFound {
 				log.Printf("Cannot bind field %s with system env:%s, got error: %v", field.Name, env, err)
 			}
 
@@ -54,7 +54,7 @@ func Unmarshal(strct interface{}) error {
 			if len(path) > 0 {
 				// bind struct field with variable from env file
 				err = bindEnvFile(ivalue, env)
-				if err != nil {
+				if err != nil && err != errBindENVNotFound {
 					log.Printf("Cannot bind field %s with env: %s from file: %s, got error: %v", field.Name, env, path, err)
 				}
 			}
@@ -87,7 +87,7 @@ func bindEnvFile(field reflect.Value, key string) error {
 	if len(env) != 0 {
 		return fill(field, env)
 	}
-	return nil
+	return errBindENVNotFound
 }
 
 var errBindENVNotFound = fmt.Errorf("env not found")

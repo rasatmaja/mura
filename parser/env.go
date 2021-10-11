@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -19,12 +20,9 @@ func init() {
 
 //ENV parse env file from given path
 func ENV(path string) error {
-
-	log.Println("Starting parse env file")
 	f, err := os.OpenFile(path, os.O_RDONLY, os.ModePerm)
 	if err != nil {
-		log.Fatalf("open file error: %v", err)
-		return err
+		return fmt.Errorf("open file error: %v", err)
 	}
 	defer f.Close()
 
@@ -41,19 +39,16 @@ func ENV(path string) error {
 		}
 
 	}
-	if err := sc.Err(); err != nil {
-		log.Fatalf("scan file error: %v", err)
-		return err
-	}
-	log.Println("Succesfully parse env file")
-	return nil
+	return sc.Err()
 }
 
 // GetENV is function to get env maps
 func GetENV(path, key string) string {
 	if len(path) > 0 {
 		singleton.Do(func() {
-			ENV(path)
+			if err := ENV(path); err != nil {
+				log.Panic(err)
+			}
 		})
 		return EnvMaps[key]
 	}
