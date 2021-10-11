@@ -6,10 +6,19 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+
+	"github.com/rasatmaja/mura/v2/parser"
 )
+
+var path string
 
 func init() {
 	log.SetPrefix("[ MURA ] ")
+}
+
+// SetENVPath will set path of env file
+func SetENVPath(dst string) {
+	path = dst
 }
 
 // Unmarshal is a function to unmarshall value from env to struct value
@@ -34,12 +43,27 @@ func Unmarshal(strct interface{}) error {
 		// if tag env found
 		// then bind those env with field struct
 		if ok {
-			err := bind(ivalue, env)
+			var err error
+			// bind struct field with system variables
+			err = bind(ivalue, env)
+			if err != nil {
+				log.Printf("Cannot bind field %s with system env:%s, got error: %v", field.Name, env, err)
+			}
+
+			// if env path present then bind envfile with struct field
+			if len(path) > 0 {
+				// bind struct field with variable from env file
+				err = bindEnvFile(ivalue, env)
+				if err != nil {
+					log.Printf("Cannot bind field %s with env: %s from file: %s, got error: %v", field.Name, env, path, err)
+				}
+			}
+
 			// if error is nil then continue into next iteration
 			if err == nil {
 				continue
 			}
-			log.Printf("Cannot bind field %s with env:%s, got error: %v", field.Name, env, err)
+
 		}
 
 		// if binding process error then
@@ -54,6 +78,14 @@ func Unmarshal(strct interface{}) error {
 				log.Printf("Cannot bind field %s with default value (%s), got error: %v", field.Name, val, err)
 			}
 		}
+	}
+	return nil
+}
+
+func bindEnvFile(field reflect.Value, key string) error {
+	env := parser.GetENV(path, key)
+	if len(env) != 0 {
+		return fill(field, env)
 	}
 	return nil
 }
