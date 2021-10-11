@@ -19,6 +19,12 @@ func TestMura(t *testing.T) {
 	os.Setenv("SERVER_PORT", "8080")
 	os.Setenv("SERVER_PRODUCTION", "true")
 	os.Setenv("PI_CONST", "3.14")
+	defer func() {
+		os.Unsetenv("SERVER_HOST")
+		os.Unsetenv("SERVER_PORT")
+		os.Unsetenv("SERVER_PRODUCTION")
+		os.Unsetenv("PI_CONST")
+	}()
 
 	t.Run("success", func(t *testing.T) {
 
@@ -128,5 +134,33 @@ func TestMura(t *testing.T) {
 			t.Fail()
 		}
 
+	})
+}
+
+func TestMuraWithEnvFile(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		defer func() {
+			os.Remove(".env")
+		}()
+		os.WriteFile(".env", []byte("SERVER_PORT=6969"), 0600)
+		SetENVPath(".env")
+
+		type TestENV struct {
+			ServerHost       string `env:"SERVER_HOST"`
+			ServerPort       int    `env:"SERVER_PORT"`
+			ServerProduction bool   `env:"SERVER_PRODUCTION"`
+
+			PiConts float64 `env:"PI_CONST"`
+		}
+
+		env := new(TestENV)
+		err := Unmarshal(env)
+
+		if err != nil {
+			t.Error(err)
+			t.Fail()
+		}
+
+		print(env)
 	})
 }
