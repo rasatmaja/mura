@@ -10,7 +10,7 @@ jobs:
     name: Check Go module availability
     runs-on: ubuntu-latest
     env:
-      MODULE_NAME: github.com/rasatmaja/mura
+      MODULE_NAME: github.com/rasatmaja/mura/v2
     steps:
 
     - name: Set up Go 1.16.x
