@@ -54,4 +54,24 @@ func TestENVError(t *testing.T) {
 			t.Fail()
 		}
 	})
+
+	t.Run("success-split-string", func(t *testing.T) {
+		singleton = sync.Once{}
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("The code did panic")
+				t.Fail()
+			}
+
+			os.Remove(".env")
+		}()
+		os.WriteFile(".env", []byte("SERVER_URL=http://hostname.com?page=2&limit=10"), 0600)
+
+		env := GetENV(".env", "SERVER_URL")
+
+		if env != "http://hostname.com?page=2&limit=10" {
+			t.Error("env SERVER_URL should be http://hostname.com?page=2&limit=10")
+			t.Fail()
+		}
+	})
 }
