@@ -32,7 +32,7 @@ func ENV(path string) error {
 		// Skip line when empty
 		v := sc.Text()
 		if len(v) != 0 {
-			env := strings.Split(v, "=")
+			env := strings.SplitN(v, "=", 2)
 
 			// get env[0] as key and env[1] as value
 			EnvMaps[env[0]] = env[1]
